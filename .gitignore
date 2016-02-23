@@ -34,3 +34,6 @@
 # libgcadapter
 libgcadapter/include
 libgcadapter/libgcadapter.a
+
+# binary
+bin/
