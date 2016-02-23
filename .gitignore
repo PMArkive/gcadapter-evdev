@@ -36,4 +36,4 @@ libgcadapter/include
 libgcadapter/libgcadapter.a
 
 # binary
-bin/
+bin/gcadapter_evdev
