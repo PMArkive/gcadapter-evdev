@@ -30,3 +30,7 @@
 
 # Debug files
 *.dSYM/
+
+# libgcadapter
+libgcadapter/include
+libgcadapter/libgcadapter.a
