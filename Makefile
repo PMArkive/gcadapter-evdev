@@ -11,5 +11,4 @@ gcadapter_evdev.o:
 	
 clean: 
 	-rm src/gcadapter_evdev.o
-	-rm src/gcadapter_evdev
-	-rmdir bin
+	-rm -rf bin

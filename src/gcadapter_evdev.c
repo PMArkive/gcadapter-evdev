@@ -5,9 +5,14 @@ void sigint(int sig)
     recieved_sigint = true;
 }
 
-char port_to_char(gc_adapter_t* adapter, int port)
+char* port_to_str(gc_adapter_t* adapter, int port)
 {
-    return adapter->pad[port] == GC_PAD_NONE ? '-' : '#';
+    char* str = malloc(3);
+    if(adapter->pad[port] != GC_PAD_NONE)
+        snprintf(str, 4, "[%i]", port + 1);
+    else
+        snprintf(str, 4, "[ ]");
+    return str;
 }
 
 bool write_button_event(int btn, struct input_event* event, int uinput_fd, bool down)
@@ -125,15 +130,13 @@ void close_port(gc_adapter_t* adapter, int port)
 
 int main(int argc, char** argv)
 {
-    printf("Wii U GameCube Adapter interface for evdev.\n");
+    printf("Wii U GameCube Adapter interface for evdev (libgcadapter %s)\n", LIBGCADAPTER_VERSION_STR);
     
     if(LIBGCADAPTER_VERSION != gc_adapter_get_version())
     {
-        printf("Invalid version of libgcadapter detected (not %s).\n", LIBGCADAPTER_VERSION_STR);
+        printf("Invalid version of libgcadapter detected (not %s)\n", LIBGCADAPTER_VERSION_STR);
         return -1;
     }
-    
-    printf("Using libgcadapter %s.\n", LIBGCADAPTER_VERSION_STR);
     
     last_update.tv_sec = 0;
     last_update.tv_usec = 0;
@@ -161,14 +164,23 @@ int main(int argc, char** argv)
                 gc_adapter_update(adapter);
                 
                 if(adapter->open)
-                    printf("\rAdapter connected (%p) %c %c %c %c", 
+                {
+                    char* ports[GC_ADAPTER_PORTS];
+                    for(int i = 0; i < GC_ADAPTER_PORTS; i++)
+                        ports[i] = port_to_str(adapter, i);
+                    printf("\rAdapter connected (%p) %s %s %s %s   ", 
                     adapter->usb_device_handle, 
-                    port_to_char(adapter, 0),
-                    port_to_char(adapter, 1),
-                    port_to_char(adapter, 2),
-                    port_to_char(adapter, 3));
+                    ports[0],
+                    ports[1],
+                    ports[2],
+                    ports[3]);
+                    for(int i = 0; i < GC_ADAPTER_PORTS; i++)
+                        free(ports[i]);
+                }
+                else if(adapter->reserved)
+                    printf("\rWaiting for adapter... (connected but reserved)");
                 else
-                    printf("\rWaiting for adapter...              ");
+                    printf("\rWaiting for adapter...                         ");
                     
                 fflush(stdout);
                 last_update = update;
